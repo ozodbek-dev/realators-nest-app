@@ -14,7 +14,3 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
-
-// 1 => install postgress on our local machine
-// 2 => host postgres in cloud
-// Heroku.com 
