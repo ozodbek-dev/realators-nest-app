@@ -4,13 +4,18 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { Home, PropertyType } from '@prisma/client';
-import { CreateHomeDto, HomeDto } from './dto/home.dto';
+import {
+  CreateHomeResponseDto,
+  HomeResponseDto,
+  UpdateHomeResponseDto,
+} from './dto/home.dto';
 
 @Controller('home')
 export class HomeController {
@@ -22,7 +27,7 @@ export class HomeController {
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
     @Query('propertyType') propertyType?: PropertyType,
-  ): Promise<HomeDto[]> {
+  ): Promise<HomeResponseDto[]> {
     const price =
       minPrice || maxPrice
         ? {
@@ -38,24 +43,27 @@ export class HomeController {
     return this.homeService.getHomes(filters);
   }
   @Get(':id')
-  getHomeById(@Param('id') id: number): Promise<HomeDto> {
+  getHomeById(@Param('id') id: number): Promise<HomeResponseDto> {
     return this.homeService.getHomeById(id);
   }
   @Post()
   createHome(
     @Body()
-   body: CreateHomeDto,
-  ) {
-    console.log(body)
+    body: CreateHomeResponseDto,
+  ): Promise<HomeResponseDto> {
+    console.log(body);
     return this.homeService.createHome(body);
   }
   @Put(':id')
-  updateHome(@Param('id') id: number) {
-    return {};
+  updateHome(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateHomeResponseDto,
+  ): Promise<HomeResponseDto> {
+    return this.homeService.updateHome(id, body);
   }
 
   @Delete(':id')
-  deleteHome(@Param('id') id: number) {
-    return {};
+  deleteHome(@Param('id', ParseIntPipe) id: number) {
+    return this.homeService.deleteHomeById(id);
   }
 }
