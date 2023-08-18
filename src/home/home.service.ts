@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HomeResponseDto } from './dto/home.dto';
 import { Image, PropertyType } from '@prisma/client';
+import { Http2ServerResponse } from 'http2';
+import { response } from 'express';
 
 interface GetHomesParam {
   city?: string;
@@ -135,7 +137,7 @@ export class HomeService {
        },
      });
     
-     if (home===null) {
+     if (!home) {
        throw new NotFoundException('Home not found');
      }
     await this.prisma.home.delete({
