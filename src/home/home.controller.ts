@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -10,12 +11,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { HomeService } from './home.service';
-import { Home, PropertyType } from '@prisma/client';
+import { PropertyType } from '@prisma/client';
 import {
   CreateHomeResponseDto,
   HomeResponseDto,
   UpdateHomeResponseDto,
 } from './dto/home.dto';
+import { User, UserInfoType } from 'src/user/decorators/user.decorator';
 
 @Controller('home')
 export class HomeController {
@@ -50,20 +52,32 @@ export class HomeController {
   createHome(
     @Body()
     body: CreateHomeResponseDto,
+    @User() user: UserInfoType,
   ): Promise<HomeResponseDto> {
-    console.log(body);
-    return this.homeService.createHome(body);
+    return this.homeService.createHome(body, user.id);
   }
   @Put(':id')
-  updateHome(
+   async updateHome(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateHomeResponseDto,
+    @User() user: UserInfoType,
   ): Promise<HomeResponseDto> {
+    const realtor = await this.homeService.getRealtorByHomeId(id)
+    if(realtor.id !== user.id){
+      throw new NotFoundException('Realtor not found')
+    }
     return this.homeService.updateHome(id, body);
   }
 
   @Delete(':id')
-  deleteHome(@Param('id', ParseIntPipe) id: number) {
+  async deleteHome(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: UserInfoType,
+  ) {
+     const realtor = await this.homeService.getRealtorByHomeId(id);
+     if (realtor.id !== user.id) {
+       throw new NotFoundException('Realtor not found');
+     }
     return this.homeService.deleteHomeById(id);
   }
 }

@@ -88,7 +88,7 @@ export class HomeService {
     propertyType,
     price,
     images,
-  }: CreateHomeParams) {
+  }: CreateHomeParams, userId:number) {
     const home = await this.prisma.home.create({
       data: {
         address,
@@ -156,5 +156,27 @@ export class HomeService {
       msg: "Home deleted successfully",
       success:true
     }
+  }
+  async getRealtorByHomeId(id: number) {
+    const home = await this.prisma.home.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        realtor: {
+          select: {
+            name: true,
+            id: true,
+            email: true,
+            phone:true
+        }
+      }
+        
+      }
+    })
+    if (!home) {
+      throw new NotFoundException('Home not found');
+    }
+    return home.realtor
   }
 }
